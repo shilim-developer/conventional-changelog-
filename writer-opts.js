@@ -20,12 +20,20 @@ module.exports = Q.all([
 
 function getWriterOpts() {
   return {
-    transform: (commit) => {
+    transform: (commit, context) => {
       if (!commit.tag || typeof commit.tag !== "string") {
         return;
       }
 
       commit.shortHash = commit.hash.substring(0, 7);
+
+      commit.message = commit.message.replace(
+        /#[1-9]\d*/g,
+        ($1) =>
+          `[${$1}](${context.host}/${context.owner}/${
+            context.repository
+          }/issues/${$1.replace("#", "")})`
+      );
 
       if (commit.tag === "doc" || commit.tag === "docs") {
         commit.tag = "📘 Documents";
